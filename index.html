@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Missouri STEAM Tax Credit Simulator</title>
+<style>
+:root{color-scheme:light;--ink:#182b25;--muted:#4e6259;--paper:#f7f6ef;--green:#214d3d;--line:#d4ded4}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 "Segoe UI",sans-serif}main{max-width:1120px;margin:auto;padding:36px 24px 64px}header{padding:24px 0 30px;border-bottom:1px solid var(--line)}h1,h2,h3,p{margin:0 0 12px}h1{font:700 clamp(2.6rem,6vw,4.7rem)/1.02 Georgia,serif;letter-spacing:-.045em;max-width:850px}h2{font:700 1.75rem Georgia,serif}header p{max-width:670px;color:var(--muted)}.kicker{font-size:.8rem;letter-spacing:.12em;font-weight:750;text-transform:uppercase;color:var(--green)}.layout{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:24px;align-items:start}section{padding:24px;background:white;border:1px solid var(--line);border-radius:12px}.examples{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 22px}button,input,select{font:inherit}button{border:1px solid #a3b6a9;border-radius:6px;background:white;color:var(--green);padding:6px 10px;cursor:pointer}button[aria-pressed=true]{background:var(--green);color:white}.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}label{display:block;font-weight:650;font-size:.9rem}input,select{width:100%;display:block;margin-top:4px;border:1px solid #9bae9f;border-radius:6px;padding:8px;color:var(--ink);background:white}input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #b16a17;outline-offset:3px}.result{background:var(--green);color:white;border-color:var(--green)}.big{font:700 clamp(2.4rem,6vw,4.3rem)/1.05 Georgia,serif;overflow-wrap:anywhere}.result p{color:#e1ede6}.rows{margin:14px 0 0}.rows div{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #ffffff40;padding:8px 0}.rows dd{margin:0;font-variant-numeric:tabular-nums;white-space:nowrap}.math{margin-top:22px}.math li{margin:7px 0}summary{cursor:pointer;font-weight:750}a{color:var(--green)}small{display:block;color:var(--muted);margin-top:10px}.error{color:#a12622;font-weight:650;margin:12px 0 0}.bar{height:12px;background:#cbdccf;border-radius:12px;overflow:hidden;margin:8px 0 0}.bar span{display:block;background:#477d64;height:100%;width:0}.capacity{margin-top:22px}[hidden]{display:none!important}@media(max-width:700px){.layout{grid-template-columns:1fr}main{padding:16px}section{padding:18px}}@media(max-width:360px){.fields{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<header><p class="kicker">Missouri House Bill 3359 · Filed proposal</p><h1>STEAM Tax Credit Simulator</h1><p>See how a donation to a Missouri K–12 STEAM or robotics program would work under the proposal. Try a fictional example or change the inputs.</p><a href="https://documents.house.mo.gov/billtracking/bills261/hlrbillspdf/6742H.01I.pdf">Read the filed bill ↗</a></header>
+<div class="layout"><section aria-labelledby="inputs"><h2 id="inputs">Build a scenario</h2>
+<div class="examples" aria-label="Fictional examples"><button type="button" data-example="cash">Cash donation</button><button type="button" data-example="equipment">Equipment donation</button><button type="button" data-example="hours">Employee time</button><button type="button" data-example="cap">Near statewide cap</button></div>
+<form id="form" novalidate><div class="fields">
+<label>Cash donated ($)<input id="cash" type="number" min="0" step="0.01" max="1000000000"></label>
+<label>Fair market value of goods ($)<input id="goods" type="number" min="0" step="0.01" max="1000000000"></label>
+<label>Employee hours in this donation<input id="hours" type="number" min="0" step="0.01" max="1000000"></label>
+<label>Pay basis<select id="basis"><option value="hourly">Hourly wage</option><option value="salary">Annual salary</option></select></label>
+<label><span id="pay-label">Hourly wage ($)</span><input id="pay" type="number" min="0" step="0.01" max="1000000000"></label>
+<label>Eligible hours used earlier this year<input id="priorHours" type="number" min="0" step="0.01" max="200"></label>
+<label>Prior taxpayer credits this year ($)<input id="priorCredit" type="number" min="0" step="0.01" max="50000"></label>
+<label>State tax liability available ($)<input id="liability" type="number" min="0" step="0.01" max="1000000000"></label>
+<label>Statewide credits ahead of this claim ($)<input id="stateUsed" type="number" min="0" step="0.01" max="10000000"></label>
+</div><p id="error" class="error" role="alert" hidden>Enter a value within the allowed range in each field.</p></form>
+<small>This models the filed proposal for tax years beginning January 1, 2027 or later while the proposed program would be in effect. It assumes a qualified taxpayer and an eligible registered program. Use fictional amounts. Values stay in this page.</small></section>
+<div><section class="result" aria-labelledby="result-title"><h2 id="result-title">Credit usable this year</h2><div id="out" aria-live="polite" aria-atomic="true"><p class="big" id="usable"></p><dl class="rows"><div><dt>Eligible donation value</dt><dd id="eligible"></dd></div><div><dt>Estimated credit awarded</dt><dd id="awarded"></dd></div><div><dt>Potential carryforward</dt><dd id="carry"></dd></div><div><dt>Eligible value less credit used now</dt><dd id="net"></dd></div></dl></div></section>
+<section class="capacity"><h2>Statewide cap</h2><p id="capacity-text"></p><div class="bar" aria-hidden="true"><span id="bar"></span></div><small>The filed text gives priority by claim order. If a claim crosses the cap, the calculator shows the partial-credit scenario. If only full claims were allowed, that claim could receive $0. The filed text does not resolve this case.</small></section></div></div>
+<section class="math"><details open><summary>Show the math</summary><ol id="steps"></ol><small>Carryforward is modeled as a potential balance under §135.655.5 for up to seven succeeding tax years. The simulator uses one employee pay rate, rounds the estimated credit to cents, and excludes transfers and other tax effects.</small></details></section>
+</main>
+<script>
+'use strict';
+const rules = Object.freeze({ rate: 0.20, taxpayerCap: 50000, stateCap: 10000000, hourCap: 200, salaryDivisor: 1680 });
+const toCents = value => Math.round(value * 100);
+function calculate(s) {
+  const hourly = s.basis === 'salary' ? s.pay / rules.salaryDivisor : s.pay;
+  const hundredths = Math.min(toCents(s.hours), toCents(rules.hourCap) - toCents(s.priorHours));
+  const hours = hundredths / 100;
+  const divisor = s.basis === 'salary' ? rules.salaryDivisor : 1;
+  const labor = Math.round(hundredths * toCents(s.pay) / (100 * divisor));
+  const eligible = toCents(s.cash) + toCents(s.goods) + labor;
+  const raw = Math.round(eligible * rules.rate);
+  const taxpayerRoom = toCents(rules.taxpayerCap) - toCents(s.priorCredit);
+  const stateRoom = toCents(rules.stateCap) - toCents(s.stateUsed);
+  const awarded = Math.min(raw, taxpayerRoom, stateRoom);
+  const usable = Math.min(awarded, toCents(s.liability));
+  const crossesCap = stateRoom > 0 && Math.min(raw, taxpayerRoom) > stateRoom;
+  const dollars = Object.fromEntries(Object.entries({
+    labor, eligible, raw, taxpayerRoom, stateRoom, awarded, usable,
+    carry: awarded - usable, net: eligible - usable
+  }).map(([key, value]) => [key, value / 100]));
+  return { hourly, hours, crossesCap, ...dollars };
+}
+const examples = {
+  cash: {cash:5000, liability:600},
+  equipment: {goods:18000, liability:5000},
+  hours: {hours:90, priorHours:130, basis:'salary', pay:84000, liability:1000},
+  cap: {cash:300000, priorCredit:5000, stateUsed:9992500, liability:10000}
+};
+const keys = ['cash','goods','hours','pay','priorHours','priorCredit','liability','stateUsed'];
+const el = id => document.getElementById(id);
+const money = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'});
+const usd = n => money.format(n);
+const buttons = [...document.querySelectorAll('[data-example]')];
+function render() {
+  const basis = el('basis').value;
+  el('pay-label').textContent = basis === 'salary' ? 'Annual salary ($)' : 'Hourly wage ($)';
+  const valid = keys.every(key => el(key).validity.valid);
+  el('error').hidden = valid;
+  for (const id of ['out','steps','capacity-text','bar']) el(id).hidden = !valid;
+  if (!valid) return;
+  const s = Object.fromEntries(keys.map(key => [key, Number(el(key).value)]));
+  const r = calculate({...s,basis});
+  for (const id of ['eligible','awarded','usable','carry','net']) el(id).textContent = usd(r[id]);
+  el('capacity-text').textContent = usd(r.stateRoom) + ' available before this claim.' +
+    (r.crossesCap ? ' This claim crosses the cap. The displayed award assumes partial credit.' : '');
+  el('bar').style.width = (s.stateUsed / rules.stateCap * 100) + '%';
+  const steps = [
+    '§135.655.2(2) · ' + r.hours + ' of ' + s.hours + ' donated hours qualify under the 200-hour annual limit. The hourly value is ' + usd(r.hourly) + (basis === 'salary' ? ' (salary ÷ 1,680).' : '.') + ' Eligible employee time is worth ' + usd(r.labor) + '.',
+    '§135.655.3 · 20% of ' + usd(r.eligible) + ' is ' + usd(r.raw) + '. The taxpayer has ' + usd(r.taxpayerRoom) + ' remaining under the annual limit.',
+    '§135.655.4 · With ' + usd(r.stateRoom) + ' of statewide capacity available, this scenario awards ' + usd(r.awarded) + '.',
+    '§135.655.5 · Apply ' + usd(r.usable) + ' against this year’s liability and carry forward up to ' + usd(r.carry) + '.'
+  ];
+  el('steps').replaceChildren(...steps.map(text => {
+    const li = document.createElement('li');
+    li.textContent = text;
+    return li;
+  }));
+}
+function preset(name) {
+  const s = examples[name];
+  for (const key of keys) el(key).value = s[key] ?? 0;
+  el('basis').value = s.basis ?? 'hourly';
+  for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.example === name));
+  render();
+}
+el('form').addEventListener('submit', event => event.preventDefault());
+el('form').addEventListener('input', () => {
+  for (const button of buttons) button.setAttribute('aria-pressed','false');
+  render();
+});
+for (const button of buttons) button.addEventListener('click', () => preset(button.dataset.example));
+preset('cash');
+</script></body></html>
